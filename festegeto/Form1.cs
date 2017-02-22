@@ -5,11 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
 
-namespace primsz
+namespace festegeto
 {
     public partial class Form1 : Form
     {
@@ -17,8 +17,10 @@ namespace primsz
         {
             InitializeComponent();
         }
+
         Bitmap buffer;
         Graphics bufferg;
+
 
         Thread t;
 
@@ -29,6 +31,7 @@ namespace primsz
             t = new Thread(new ThreadStart(szal));
             t.Start();
         }
+
         void szal()
         {
             bufferg.Clear(Color.White);
@@ -48,6 +51,36 @@ namespace primsz
                             buffer.SetPixel(x, y, Color.Black);
 
             this.Invoke(new Action(() => { button1.Enabled = true; }));
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (buffer == null)
+                return;
+
+            using (Graphics g = panel2.CreateGraphics())
+            {
+                lock (buffer)
+                    g.DrawImage(buffer, 0, 0);
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            buffer = new Bitmap(panel2.Width, panel2.Height);
+            lock (buffer)
+                bufferg = Graphics.FromImage(buffer);
+        }
+
+        private void panel2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_MouseClick(object sender, MouseEventArgs e)
+        {
+            Form2 f2 = new Form2(String.Format("X={0}; Y={1}", e.X, e.Y));
+            f2.ShowDialog(this);
         }
     }
 }
